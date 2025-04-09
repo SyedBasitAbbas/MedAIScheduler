@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+openai
+pymongo
+nest_asyncio
+pytz
+apscheduler
+gunicorn 
