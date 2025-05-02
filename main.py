@@ -241,8 +241,14 @@ async def get_topics():
 @app.post("/fetch-topics")
 async def trigger_fetch_topics():
     try:
+        logger.info("Triggering topic fetch via /fetch-topics endpoint")
         result = await fetch_and_store_topics()
-        return {"status": "success", "topics": result["topics"]}
+        logger.info(f"Topic fetch completed via /fetch-topics endpoint. Fetched {len(result['topics'])} topics")
+        return {
+            "status": "success",
+            "topics": result["topics"],
+            "message": f"Successfully fetched and stored {len(result['topics'])} topics"
+        }
     except Exception as e:
         logger.error(f"Failed to fetch topics: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch topics: {str(e)}")
