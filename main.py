@@ -247,6 +247,17 @@ async def trigger_fetch_topics():
         logger.error(f"Failed to fetch topics: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch topics: {str(e)}")
 
+@app.post("/update-topics-now")
+async def update_topics_now():
+    try:
+        logger.info("Immediate topic update triggered via /update-topics-now")
+        result = await fetch_and_store_topics()
+        logger.info("Immediate topic update completed")
+        return {"status": "success", "topics": result["topics"], "message": "Topics updated immediately"}
+    except Exception as e:
+        logger.error(f"Failed to update topics immediately: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update topics immediately: {str(e)}")
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
@@ -286,4 +297,4 @@ async def db_status():
 if __name__ == "__main__":
     config = uvicorn.Config(app, host="0.0.0.0", port=8000, loop="asyncio")
     server = uvicorn.Server(config)
-    server.run() 
+    server.run()
