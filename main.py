@@ -96,10 +96,15 @@ async def fetch_and_store_topics():
 
         # Add a unique identifier to the prompt to avoid caching
         unique_id = str(uuid.uuid4())
-        prompt = f"""As of {current_time.strftime('%Y-%m-%d %H:%M:%S %Z')}, perform a fresh, real-time search of the web and current online discussions to identify the 5 most talked-about medical topics today.
-        Focus on trends that have emerged or gained significant attention in the last 24 hours. This request is unique (ID: {unique_id}) to ensure a new search. Provide only the list of topics,
-        ranked by popularity, that are trending and suitable for creating articles for medical students. Just return the topic names, don't say any other thing, and don't add numbering.
-        You are bound to return any topic on daily basis if you can't find it you can go with the others but we need topics in response"""
+        prompt = f"""You MUST use the Google Search tool to search for trending medical topics today ({current_time.strftime('%Y-%m-%d')}).
+        
+        Search for "trending medical news topics today" or "latest medical research topics" or similar queries to find fresh information.
+        
+        Based on your search results, compile exactly 5 trending medical topics that would be interesting to medical students.
+        
+        Return ONLY the topic names, one per line, with no numbering, commentary, or other text. You must return 5 topics regardless of search results.
+        
+        This request ID is {unique_id} to avoid caching."""
         
         logger.info(f"Sending API request to Gemini with prompt ID: {unique_id}")
 
