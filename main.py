@@ -103,24 +103,22 @@ async def fetch_and_store_topics():
         
         logger.info(f"Sending API request to Gemini with prompt ID: {unique_id}")
 
-        # Build Gemini request
-        contents = [
-            types.Content(
-                role="user",
-                parts=[types.Part.from_text(text=prompt)],
-            )
+        # — Enable Google Search plugin for live data —
+        tools = [
+            types.Tool(google_search=types.GoogleSearch()),
         ]
         generate_config = types.GenerateContentConfig(
+            tools=tools,
             response_mime_type="text/plain",
-            temperature=0.7,   
-            top_p=0.9        
+            temperature=0.7,   # add randomness so outputs vary
+            top_p=0.9          # optional: nucleus sampling
         )
 
         # Stream Gemini output and concatenate
         response_chunks = []
         for chunk in gemini_client.models.generate_content_stream(
             model="gemini-2.5-flash-preview-04-17",
-            contents=contents,
+            contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=generate_config,
         ):
             response_chunks.append(chunk.text)
