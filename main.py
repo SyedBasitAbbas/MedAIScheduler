@@ -32,32 +32,24 @@ logger.info(f"Current working directory: {os.getcwd()}")
 env_file_path = os.path.join(os.getcwd(), ".env")
 logger.info(f"Looking for .env file at: {env_file_path}")
 if os.path.exists(env_file_path):
-    logger.info(".env file found")
+    logger.info(".env file found, loading variables.")
+    load_dotenv() # Keep loading for GEMINI_API_KEY
 else:
     logger.warning(".env file not found")
 
-load_dotenv()
+# Hardcode MongoDB URI
+MONGODB_URI = "mongodb+srv://syedbasitabbas10:FZg3aL0FbRYyxGdh@topmedicalarticles.pfo2g.mongodb.net/?retryWrites=true&w=majority&appName=TopMedicalArticles"
+logger.info(f"MONGODB_URI is hardcoded.")
 
-# API Keys and MongoDB URI from environment variables
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-MONGODB_URI = os.environ.get(
-    "MONGODB_URI",
-    "mongodb+srv://syedbasitabbas10:FZg3aL0FbRYyxGdh@topmedicalarticles.pfo2g.mongodb.net/?retryWrites=true&w=majority&appName=TopMedicalArticles"
-)
 
-logger.info(f"OPENAI_API_KEY: {'Set' if OPENAI_API_KEY else 'Not set'}")
-logger.info(f"MONGODB_URI: {'Set' if MONGODB_URI else 'Not set'}")
-
-if not all([OPENAI_API_KEY, MONGODB_URI]):
-    raise ValueError("One or more required keys (API keys or MongoDB URI) are missing.")
 
 # ——— Gemini client setup ———
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 logger.info(f"GEMINI_API_KEY: {'Set' if GEMINI_API_KEY else 'Not set'}")
 
 if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is required.")
-    
+    raise ValueError("GEMINI_API_KEY environment variable is required in .env file.")
+
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 logger.info("Gemini client initialized.")
 
