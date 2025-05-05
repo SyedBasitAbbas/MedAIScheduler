@@ -14,8 +14,8 @@ import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import uuid
 from typing import List
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 
 # Apply nest_asyncio to allow nested event loops
 nest_asyncio.apply()
