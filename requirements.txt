@@ -9,3 +9,4 @@ pytz
 apscheduler
 gunicorn 
 google-generativeai
+google-genai
