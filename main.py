@@ -14,9 +14,8 @@ import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import uuid
 from typing import List
-import google.generativeai as genai
-from google.generativeai import types
-import google.generativeai.protos as protos
+from google import genai
+from google.genai import types
 
 # Apply nest_asyncio to allow nested event loops
 nest_asyncio.apply()
@@ -44,16 +43,15 @@ logger.info(f"MONGODB_URI is hardcoded.")
 
 
 
-# ——— Gemini client setup ———
+# ——— Google GenAI client setup ———
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 logger.info(f"GEMINI_API_KEY: {'Set' if GEMINI_API_KEY else 'Not set'}")
 
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is required in .env file.")
 
-# Configure the library with the API key instead of creating a client
-genai.configure(api_key=GEMINI_API_KEY)
-logger.info("google.generativeai configured with API key.")
+client = genai.Client(api_key=GEMINI_API_KEY)
+logger.info("Google GenAI client initialized.")
 
 # Connect to MongoDB
 try:
@@ -108,7 +106,7 @@ async def fetch_and_store_topics():
 
         # — Enable Google Search plugin for live data —
         tools = [
-            types.Tool(google_search=protos.GoogleSearch()),
+            types.Tool(google_search=types.GoogleSearch()),
         ]
         generate_config = types.GenerateContentConfig(
             tools=tools,
@@ -117,16 +115,11 @@ async def fetch_and_store_topics():
             top_p=0.9          
         )
 
-        # Instantiate the model directly here
-        model_name = "gemini-2.5-flash-preview-04-17" # Use a known, current model name
-        model = genai.GenerativeModel(model_name)
-        logger.info(f"Using GenerativeModel: {model_name}")
-
-        # Call generate_content_stream directly on the model instance
-        response_stream = model.generate_content(
+        # New google-genai streaming call
+        response_stream = client.models.generate_content_stream(
+            model="gemini-2.5-flash-preview-04-17",
             contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=generate_config,
-            stream=True # Ensure streaming is enabled
         )
 
         response_chunks = []
