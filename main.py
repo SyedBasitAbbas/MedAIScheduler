@@ -14,7 +14,8 @@ import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import uuid
 from typing import List
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 # Apply nest_asyncio to allow nested event loops
 nest_asyncio.apply()
@@ -50,9 +51,11 @@ logger.info(f"MONGODB_URI: {'Set' if MONGODB_URI else 'Not set'}")
 if not all([OPENAI_API_KEY, MONGODB_URI]):
     raise ValueError("One or more required keys (API keys or MongoDB URI) are missing.")
 
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-logger.info("OpenAI client initialized.")
+# ——— Gemini client setup ———
+GEMINI_API_KEY = "AIzaSyBAWrwbkSv77DUvPT8YDOEcQmO8VJXLZY0"
+logger.info(f"GEMINI_API_KEY is set to: {GEMINI_API_KEY}")
+gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+logger.info("Gemini client initialized with hardcoded API key.")
 
 # Connect to MongoDB
 try:
@@ -98,22 +101,30 @@ async def fetch_and_store_topics():
         ranked by popularity, that are trending and suitable for creating articles for medical students. Just return the topic names, don't say any other thing, and don't add numbering.
         You are bound to return any topic on daily basis if you can't find it you can go with the others but we need topics in response"""
         
-        logger.info(f"Sending API request to OpenAI with prompt ID: {unique_id}")
-        
-        completion = openai_client.chat.completions.create(
-            model="gpt-4o-search-preview",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-        
-        logger.info(f"Received response from OpenAI")
-        
-        # Split the response into individual topics
-        topics = completion.choices[0].message.content.strip().split("\n")
+        logger.info(f"Sending API request to Gemini with prompt ID: {unique_id}")
+
+        # Build Gemini request
+        contents = [
+            types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=prompt)],
+            )
+        ]
+        generate_config = types.GenerateContentConfig(response_mime_type="text/plain")
+
+        # Stream Gemini output and concatenate
+        response_chunks = []
+        for chunk in gemini_client.models.generate_content_stream(
+            model="gemini-2.5-flash-preview-04-17",
+            contents=contents,
+            config=generate_config,
+        ):
+            response_chunks.append(chunk.text)
+        full_response = "".join(response_chunks).strip()
+        logger.info("Received response from Gemini")
+
+        # Split into individual topics
+        topics = full_response.split("\n")
         # Clean up each topic: remove leading Markdown list markers (e.g., "- ", "* ", "1. ") and extra whitespace
         cleaned_topics = []
         for topic in topics:
