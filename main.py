@@ -50,8 +50,9 @@ logger.info(f"GEMINI_API_KEY: {'Set' if GEMINI_API_KEY else 'Not set'}")
 if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY environment variable is required in .env file.")
 
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-logger.info("Gemini client initialized.")
+# Configure the library with the API key instead of creating a client
+genai.configure(api_key=GEMINI_API_KEY)
+logger.info("google.generativeai configured with API key.")
 
 # Connect to MongoDB
 try:
@@ -115,13 +116,20 @@ async def fetch_and_store_topics():
             top_p=0.9          
         )
 
-        # Stream Gemini output and concatenate
-        response_chunks = []
-        for chunk in gemini_client.models.generate_content_stream(
-            model="gemini-2.5-flash-preview-04-17",
+        # Instantiate the model directly here
+        model_name = "gemini-2.5-flash-preview-04-17" # Use a known, current model name
+        model = genai.GenerativeModel(model_name)
+        logger.info(f"Using GenerativeModel: {model_name}")
+
+        # Call generate_content_stream directly on the model instance
+        response_stream = model.generate_content(
             contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
             config=generate_config,
-        ):
+            stream=True # Ensure streaming is enabled
+        )
+
+        response_chunks = []
+        for chunk in response_stream:
             response_chunks.append(chunk.text)
         full_response = "".join(response_chunks).strip()
         logger.info("Received response from Gemini")
