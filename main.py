@@ -98,7 +98,7 @@ async def fetch_and_store_topics():
         unique_id = str(uuid.uuid4())
         prompt = f"""You MUST use the Google Search tool to search for trending medical topics today ({current_time.strftime('%Y-%m-%d')}).
         
-        Search for "trending medical news topics today" or "latest medical research topics" or similar queries to find fresh information.
+        Search for "trending football topics" or "latest medical research topics" or similar queries to find fresh information.
         
         Based on your search results, compile exactly 5 trending medical topics that would be interesting to medical students.
         
