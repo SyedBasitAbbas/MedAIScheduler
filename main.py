@@ -16,6 +16,7 @@ import uuid
 from typing import List
 import google.generativeai as genai
 from google.generativeai import types
+import google.generativeai.protos as protos
 
 # Apply nest_asyncio to allow nested event loops
 nest_asyncio.apply()
@@ -107,7 +108,7 @@ async def fetch_and_store_topics():
 
         # — Enable Google Search plugin for live data —
         tools = [
-            types.Tool(google_search=types.GoogleSearch()),
+            types.Tool(google_search=protos.GoogleSearch()),
         ]
         generate_config = types.GenerateContentConfig(
             tools=tools,
