@@ -52,10 +52,14 @@ if not all([OPENAI_API_KEY, MONGODB_URI]):
     raise ValueError("One or more required keys (API keys or MongoDB URI) are missing.")
 
 # ——— Gemini client setup ———
-GEMINI_API_KEY = "AIzaSyBAWrwbkSv77DUvPT8YDOEcQmO8VJXLZY0"
-logger.info(f"GEMINI_API_KEY is set to: {GEMINI_API_KEY}")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+logger.info(f"GEMINI_API_KEY: {'Set' if GEMINI_API_KEY else 'Not set'}")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is required.")
+    
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-logger.info("Gemini client initialized with hardcoded API key.")
+logger.info("Gemini client initialized.")
 
 # Connect to MongoDB
 try:
@@ -98,7 +102,7 @@ async def fetch_and_store_topics():
         unique_id = str(uuid.uuid4())
         prompt = f"""You MUST use the Google Search tool to search for trending medical topics today ({current_time.strftime('%Y-%m-%d')}).
         
-        Search for "trending football topics" or "latest medical research topics" or similar queries to find fresh information.
+        Search for "trending medical news topics today" or "latest medical research topics" or similar queries to find fresh information.
         
         Based on your search results, compile exactly 5 trending medical topics that would be interesting to medical students.
         
@@ -115,8 +119,8 @@ async def fetch_and_store_topics():
         generate_config = types.GenerateContentConfig(
             tools=tools,
             response_mime_type="text/plain",
-            temperature=0.7,   # add randomness so outputs vary
-            top_p=0.9          # optional: nucleus sampling
+            temperature=0.7,   
+            top_p=0.9          
         )
 
         # Stream Gemini output and concatenate
