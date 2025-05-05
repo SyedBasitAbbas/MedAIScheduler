@@ -110,7 +110,11 @@ async def fetch_and_store_topics():
                 parts=[types.Part.from_text(text=prompt)],
             )
         ]
-        generate_config = types.GenerateContentConfig(response_mime_type="text/plain")
+        generate_config = types.GenerateContentConfig(
+            response_mime_type="text/plain",
+            temperature=0.7,   
+            top_p=0.9        
+        )
 
         # Stream Gemini output and concatenate
         response_chunks = []
