@@ -92,15 +92,45 @@ async def fetch_and_store_topics():
 
         # Add a unique identifier to the prompt to avoid caching
         unique_id = str(uuid.uuid4())
-        prompt = f"""You MUST use the Google Search tool to search for trending medical topics today ({current_time.strftime('%Y-%m-%d')}).
-        
-        Search for "trending medical news topics today" or "latest medical research topics" or similar queries to find fresh information.
-        
-        Based on your search results, compile exactly 5 trending medical topics that would be interesting to medical students.
-        
-        Return ONLY the topic names, one per line, with no numbering, commentary, or other text. You must return 5 topics regardless of search results.
-        
-        This request ID is {unique_id} to avoid caching."""
+        prompt = f"""
+            🎯 Objective
+            Generate the top 5 distinct, highly‑relevant medical trending topics for today, ensuring each of the four target audiences (Doctors, Students, General Public, Researchers) is represented at least once.
+            ---
+            👥 Roles
+            Research Agent:
+            Expert in real‑time medical news and literature.
+            Proficient with Google Search tool to discover “trending medical news topics today” or “latest medical research topics.”
+            
+            Reviewer:
+            Ensures topics are non‑generic, mutually distinct, and mapped to at least one audience segment.
+            ---
+            🛠️ Tools
+            Google Search: Query terms such as:
+            "trending medical news topics today"
+            "latest medical research topics"
+            "top medical breakthroughs today"
+            ---
+            📝 Task
+            Use Google Search tool to retrieve freshest medical‑trend sources dated 2025‑05‑06.
+            Identify 5 non similar topics.
+            Ensure coverage: at least one topic tailored for each audience in the attached list:
+            Doctors
+            Students
+            General Public
+            Researchers
+            Avoid overly broad themes (e.g. “cancer research”); instead choose focused, timely headlines or niche breakthroughs.
+            ---
+            🔍 Step‑by‑Step
+            Search “trending medical news topics today” with date filter = today.
+            Scan top 3–5 news aggregator or journal sites (e.g. PubMed, NEJM, Medscape).
+            Note candidate topics; reject duplicates or generic headings.
+            Map each chosen topic to at least one audience group.
+            Finalize exactly 5 topic titles.
+            Make sure the topic names are not complex and understandable
+            Use this Request ID to prevent caching: {{unique_id}}
+            ---
+            📤 Output
+            Return only the 5 topic names, one per line, no numbering, no extra commentary."""
         
         logger.info(f"Sending API request to Gemini with prompt ID: {unique_id}")
 
